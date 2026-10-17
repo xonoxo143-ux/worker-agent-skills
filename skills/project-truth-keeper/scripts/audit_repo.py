@@ -42,7 +42,7 @@ def audit(root):
                 continue
             headings = re.findall(r'^#{1,3}\s+(.+)$', raw, flags=re.M)
             stale = re.findall(r'(?im)\b(archived|deprecated|superseded|historical|do not use)\b', raw)
-            found.append({'path': f.relative_to(root).as_posix(), 'headings': headings[:10],
+            found.append({'path': f.relative_to(root).as_posix(), 'heading_count': len(headings),
                           'stale_marker_count': len(stale), 'bytes': len(raw.encode('utf-8'))})
             if len(found) >= MAX_DOCS:
                 break

@@ -29,13 +29,15 @@ class ReleaseTests(unittest.TestCase):
     def test_read_only_audit_skips_private(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            (root / 'CURRENT.md').write_text('# Current\nDeprecated old design\n')
+            (root / 'CURRENT.md').write_text('# SECRET_HEADING_SENTINEL\nDeprecated old design\n')
             (root / '.env').write_text('TOKEN=never-expose')
             (root / 'private').mkdir()
             (root / 'private/STATUS.md').write_text('not-for-display')
             result = AUDIT.audit(root)
             self.assertEqual(result['docs_scanned'], 1)
             self.assertEqual(result['candidate_docs'][0]['stale_marker_count'], 1)
+            self.assertEqual(result['candidate_docs'][0]['heading_count'], 1)
+            self.assertNotIn('SECRET_HEADING_SENTINEL', json.dumps(result))
             self.assertNotIn('never-expose', json.dumps(result))
             self.assertNotIn('not-for-display', json.dumps(result))
 
